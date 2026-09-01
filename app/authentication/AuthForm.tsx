@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
+  deriveNameFromEmail,
   validateAuthForm,
   type AuthFormErrors,
   type AuthMode,
@@ -14,7 +15,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [fieldErrors, setFieldErrors] = useState<AuthFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     event.preventDefault();
     setFormError(null);
 
-    const { valid, errors } = validateAuthForm({ mode, email, password, name });
+    const { valid, errors } = validateAuthForm({ mode, email, password });
     setFieldErrors(errors);
     if (!valid) return;
 
@@ -39,7 +39,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     };
 
     if (isSignup) {
-      await authClient.signUp.email({ email, password, name }, callbacks);
+      await authClient.signUp.email(
+        { email, password, name: deriveNameFromEmail(email) },
+        callbacks,
+      );
     } else {
       await authClient.signIn.email({ email, password }, callbacks);
     }
@@ -51,24 +54,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <p role="alert" className="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-600">
           {formError}
         </p>
-      )}
-
-      {isSignup && (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="text-sm font-medium">
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/15"
-          />
-          {fieldErrors.name && (
-            <p className="text-sm text-red-600">{fieldErrors.name}</p>
-          )}
-        </div>
       )}
 
       <div className="flex flex-col gap-1">

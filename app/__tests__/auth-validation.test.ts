@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  deriveNameFromEmail,
   isValidEmail,
   parseAuthMode,
   validateAuthForm,
@@ -54,31 +55,33 @@ describe("validateAuthForm", () => {
     expect(errors.password).toBeDefined();
   });
 
-  it("requires a name on signup but not signin", () => {
-    const signup = validateAuthForm({
-      mode: "signup",
-      email: "a@b.com",
-      password: "password123",
-    });
-    expect(signup.valid).toBe(false);
-    expect(signup.errors.name).toBeDefined();
-
-    const signin = validateAuthForm({
-      mode: "signin",
-      email: "a@b.com",
-      password: "password123",
-    });
-    expect(signin.valid).toBe(true);
-  });
-
   it("accepts a valid signup payload", () => {
     const { valid, errors } = validateAuthForm({
       mode: "signup",
       email: "a@b.com",
       password: "password123",
-      name: "Ada",
     });
     expect(valid).toBe(true);
     expect(errors).toEqual({});
+  });
+
+  it("accepts a valid signin payload", () => {
+    const { valid, errors } = validateAuthForm({
+      mode: "signin",
+      email: "a@b.com",
+      password: "password123",
+    });
+    expect(valid).toBe(true);
+    expect(errors).toEqual({});
+  });
+});
+
+describe("deriveNameFromEmail", () => {
+  it("uses the local part before @", () => {
+    expect(deriveNameFromEmail("ada@example.com")).toBe("ada");
+  });
+
+  it("falls back to the full string if there is no @", () => {
+    expect(deriveNameFromEmail("ada")).toBe("ada");
   });
 });

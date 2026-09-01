@@ -21,20 +21,15 @@ vi.mock("@/lib/auth-client", () => ({
 function fillAndSubmit({
   email,
   password,
-  name,
 }: {
   email?: string;
   password?: string;
-  name?: string;
 }) {
   if (email !== undefined) {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: email } });
   }
   if (password !== undefined) {
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: password } });
-  }
-  if (name !== undefined) {
-    fireEvent.change(screen.getByLabelText("Name"), { target: { value: name } });
   }
   fireEvent.click(screen.getByRole("button"));
 }
@@ -50,7 +45,6 @@ describe("AuthForm signin mode", () => {
     render(<AuthForm mode="signin" />);
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Name")).not.toBeInTheDocument();
     expect(screen.getByRole("button")).toHaveTextContent("Sign in");
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
@@ -96,9 +90,10 @@ describe("AuthForm signin mode", () => {
 });
 
 describe("AuthForm signup mode", () => {
-  it("renders a name field, with a link to signin", () => {
+  it("renders email and password only, with a link to signin", () => {
     render(<AuthForm mode="signup" />);
-    expect(screen.getByLabelText("Name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
     expect(screen.getByRole("button")).toHaveTextContent("Create account");
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
@@ -108,24 +103,24 @@ describe("AuthForm signup mode", () => {
 
   it("blocks submit on a too-short password", () => {
     render(<AuthForm mode="signup" />);
-    fillAndSubmit({ email: "a@b.com", password: "short", name: "Ada" });
+    fillAndSubmit({ email: "a@b.com", password: "short" });
     expect(
       screen.getByText("Password must be at least 8 characters."),
     ).toBeInTheDocument();
     expect(signUpEmail).not.toHaveBeenCalled();
   });
 
-  it("calls signUp.email with name included", async () => {
+  it("calls signUp.email with a name derived from the email", async () => {
     signUpEmail.mockImplementation((data, callbacks) => {
       callbacks.onSuccess();
       return Promise.resolve({ data: {}, error: null });
     });
     render(<AuthForm mode="signup" />);
-    fillAndSubmit({ email: "a@b.com", password: "password123", name: "Ada" });
+    fillAndSubmit({ email: "ada@example.com", password: "password123" });
 
     await waitFor(() => {
       expect(signUpEmail).toHaveBeenCalledWith(
-        { email: "a@b.com", password: "password123", name: "Ada" },
+        { email: "ada@example.com", password: "password123", name: "ada" },
         expect.any(Object),
       );
     });

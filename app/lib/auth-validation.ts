@@ -8,14 +8,12 @@ export type AuthMode = "signin" | "signup";
 export type AuthFormErrors = {
   email?: string;
   password?: string;
-  name?: string;
 };
 
 export type AuthFormInput = {
   mode: AuthMode;
   email: string;
   password: string;
-  name?: string;
 };
 
 export function isValidEmail(email: string): boolean {
@@ -46,9 +44,11 @@ export function validateAuthForm(input: AuthFormInput): {
     errors.password = `Password must be at most ${MAX_PASSWORD_LENGTH} characters.`;
   }
 
-  if (input.mode === "signup" && !input.name?.trim()) {
-    errors.name = "Name is required.";
-  }
-
   return { valid: Object.keys(errors).length === 0, errors };
+}
+
+// better-auth's core user schema requires a non-empty `name`; since this
+// form only collects email + password, derive a placeholder from the email.
+export function deriveNameFromEmail(email: string): string {
+  return email.split("@")[0] || email;
 }
