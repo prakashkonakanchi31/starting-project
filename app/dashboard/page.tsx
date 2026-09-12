@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { verifySession } from "@/lib/session";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await verifySession();
+
   return (
     <div>
       Dashboard page
