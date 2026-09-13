@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
+
+// Header transitively imports lib/auth.ts, which opens a live bun:sqlite
+// connection at module-load time — mock it out so this jsdom test doesn't
+// depend on the real DB.
+vi.mock('@/components/Header', () => ({
+  Header: () => null,
+}));
 
 describe('RootLayout', () => {
   let RootLayout: any;
@@ -78,7 +85,7 @@ describe('RootLayout', () => {
     const children = <div data-testid="test">Test Content</div>;
     const result = RootLayout({ children });
     const bodyProps = result.props.children.props;
-    expect(bodyProps.children).toBe(children);
+    expect(bodyProps.children).toContain(children);
   });
 });
 
