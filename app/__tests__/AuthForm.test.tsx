@@ -2,12 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AuthForm } from "@/app/authentication/AuthForm";
 
-const pushMock = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock }),
-}));
-
 const signInEmail = vi.fn();
 const signUpEmail = vi.fn();
 
@@ -35,9 +29,11 @@ function fillAndSubmit({
 }
 
 beforeEach(() => {
-  pushMock.mockReset();
   signInEmail.mockReset();
   signUpEmail.mockReset();
+  // @ts-expect-error - reassignable stub so onSuccess's hard navigation is observable
+  delete window.location;
+  window.location = { href: "" } as unknown as Location;
 });
 
 describe("AuthForm signin mode", () => {
@@ -74,7 +70,7 @@ describe("AuthForm signin mode", () => {
         expect.any(Object),
       );
     });
-    expect(pushMock).toHaveBeenCalledWith("/dashboard");
+    expect(window.location.href).toBe("/dashboard");
   });
 
   it("shows the server error message on failure", async () => {
@@ -124,6 +120,6 @@ describe("AuthForm signup mode", () => {
         expect.any(Object),
       );
     });
-    expect(pushMock).toHaveBeenCalledWith("/dashboard");
+    expect(window.location.href).toBe("/dashboard");
   });
 });

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { verifySession } from "@/lib/session";
-import { updateNote } from "@/lib/notes";
+import { updateNote, deleteNote } from "@/lib/notes";
 import {
   validateNoteForm,
   EMPTY_TIPTAP_DOC,
@@ -30,4 +30,10 @@ export async function updateNoteAction(
   }
 
   redirect(`/notes/${note.id}`);
+}
+
+export async function deleteNoteAction(noteId: string): Promise<void> {
+  const { user } = await verifySession();
+  deleteNote(user.id, noteId);
+  redirect("/dashboard");
 }

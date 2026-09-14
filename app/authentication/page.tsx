@@ -1,6 +1,5 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
 import { parseAuthMode } from "@/app/lib/auth-validation";
 import { AuthForm } from "./AuthForm";
 
@@ -9,7 +8,7 @@ export default async function AuthenticationPage({
 }: {
   searchParams: Promise<{ mode?: string | string[] }>;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (session) redirect("/dashboard");
 
   const { mode: modeParam } = await searchParams;

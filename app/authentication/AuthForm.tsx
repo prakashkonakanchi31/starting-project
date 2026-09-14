@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -12,7 +11,6 @@ import {
 } from "@/app/lib/auth-validation";
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<AuthFormErrors>({});
@@ -31,7 +29,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
     const callbacks = {
       onRequest: () => setIsSubmitting(true),
-      onSuccess: () => router.push("/dashboard"),
+      onSuccess: () => {
+        // A hard navigation (not router.push) so the root layout's
+        // session-dependent Header re-renders server-side with the
+        // just-created session, instead of reusing the signed-out
+        // layout the client router cached before login.
+        window.location.href = "/dashboard";
+      },
       onError: (ctx: { error: { message: string } }) => {
         setIsSubmitting(false);
         setFormError(ctx.error.message);

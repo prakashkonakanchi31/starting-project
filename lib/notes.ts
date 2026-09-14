@@ -1,5 +1,5 @@
 import "server-only";
-import { get, run } from "@/lib/db";
+import { get, query, run } from "@/lib/db";
 
 export type Note = {
   id: string;
@@ -55,6 +55,15 @@ export function createNote(
   return toNote(row);
 }
 
+export function getNotesByUser(userId: string): Note[] {
+  const rows = query<NoteRow>(
+    `SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC`,
+    [userId],
+  );
+
+  return rows.map(toNote);
+}
+
 export function getNoteById(userId: string, noteId: string): Note | null {
   const row = get<NoteRow>(
     `SELECT * FROM notes WHERE id = ? AND user_id = ?`,
@@ -84,4 +93,13 @@ export function updateNote(
   }
 
   return toNote(row);
+}
+
+export function deleteNote(userId: string, noteId: string): boolean {
+  const { changes } = run(
+    `DELETE FROM notes WHERE id = ? AND user_id = ?`,
+    [noteId, userId],
+  );
+
+  return changes > 0;
 }
