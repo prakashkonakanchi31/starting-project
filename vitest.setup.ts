@@ -11,4 +11,3 @@ vi.mock('next/font/google', () => ({
 afterEach(() => {
   cleanup();
 });
-

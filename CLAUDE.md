@@ -12,7 +12,7 @@ Whenever working with any third party libraries or somethign similar, you MUST l
 
 This repo is a Next.js starter (`create-next-app`) with the package name `claude-code`. The actual current code (`app/page.tsx`, `app/lib/cities.ts`) is a small "World Clock" demo — a form where a user types a city name, validated/looked up against a curated `CITY_TIMEZONES` map in `app/lib/cities.ts`, that renders a live analog SVG clock for that city's timezone.
 
-`SPEC.md` describes a *separate, unbuilt* target application — a rich-text note-taking app (auth via better-auth, TipTap editor, SQLite via Bun, public note sharing at `/p/[slug]`). None of that (auth, DB layer, notes API, TipTap) exists in the code yet. Treat `SPEC.md` as the spec to build toward, not a description of current architecture — check `app/` directly before assuming any note-related file, route, or table exists.
+`SPEC.md` describes a _separate, unbuilt_ target application — a rich-text note-taking app (auth via better-auth, TipTap editor, SQLite via Bun, public note sharing at `/p/[slug]`). None of that (auth, DB layer, notes API, TipTap) exists in the code yet. Treat `SPEC.md` as the spec to build toward, not a description of current architecture — check `app/` directly before assuming any note-related file, route, or table exists.
 
 ## Commands
 

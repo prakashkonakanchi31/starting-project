@@ -1,20 +1,20 @@
-import { Database } from "bun:sqlite";
-import { existsSync, mkdirSync } from "fs";
-import { dirname } from "path";
+import { Database } from 'bun:sqlite';
+import { existsSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 
 declare global {
   var __appDb: Database | undefined;
 }
 
 function createConnection(): Database {
-  const dbPath = process.env.DB_PATH ?? "data/app.db";
+  const dbPath = process.env.DB_PATH ?? 'data/app.db';
   const dir = dirname(dbPath);
-  if (dir && dir !== "." && !existsSync(dir)) {
+  if (dir && dir !== '.' && !existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
 
   const db = new Database(dbPath, { create: true });
-  db.run("PRAGMA journal_mode = WAL;");
+  db.run('PRAGMA journal_mode = WAL;');
   runMigrations(db);
   return db;
 }
@@ -92,9 +92,9 @@ function runMigrations(db: Database): void {
     );
   `);
 
-  db.run("CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);");
-  db.run("CREATE INDEX IF NOT EXISTS idx_notes_public_slug ON notes(public_slug);");
-  db.run("CREATE INDEX IF NOT EXISTS idx_notes_is_public ON notes(is_public);");
+  db.run('CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_notes_public_slug ON notes(public_slug);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_notes_is_public ON notes(is_public);');
 }
 
 export function getDb(): Database {
@@ -105,13 +105,21 @@ export function getDb(): Database {
 }
 
 export function query<T>(sql: string, params: unknown[] = []): T[] {
-  return getDb().query(sql).all(...(params as [])) as T[];
+  return getDb()
+    .query(sql)
+    .all(...(params as [])) as T[];
 }
 
 export function get<T>(sql: string, params: unknown[] = []): T | undefined {
-  return (getDb().query(sql).get(...(params as [])) as T | null) ?? undefined;
+  return (
+    (getDb()
+      .query(sql)
+      .get(...(params as [])) as T | null) ?? undefined
+  );
 }
 
 export function run(sql: string, params: unknown[] = []) {
-  return getDb().query(sql).run(...(params as []));
+  return getDb()
+    .query(sql)
+    .run(...(params as []));
 }

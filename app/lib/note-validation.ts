@@ -7,8 +7,8 @@ export type NoteFormState = {
 };
 
 export const EMPTY_TIPTAP_DOC = JSON.stringify({
-  type: "doc",
-  content: [{ type: "paragraph" }],
+  type: 'doc',
+  content: [{ type: 'paragraph' }],
 });
 
 export function validateNoteForm(input: { title: string }): {
@@ -18,7 +18,7 @@ export function validateNoteForm(input: { title: string }): {
   const errors: NoteFormErrors = {};
 
   if (!input.title.trim()) {
-    errors.title = "Title is required.";
+    errors.title = 'Title is required.';
   }
 
   return { valid: Object.keys(errors).length === 0, errors };

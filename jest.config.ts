@@ -12,11 +12,7 @@ const config: Config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
-  collectCoverageFrom: [
-    'app/**/*.{js,jsx,ts,tsx}',
-    '!app/**/*.d.ts',
-    '!app/**/layout.tsx',
-  ],
+  collectCoverageFrom: ['app/**/*.{js,jsx,ts,tsx}', '!app/**/*.d.ts', '!app/**/layout.tsx'],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

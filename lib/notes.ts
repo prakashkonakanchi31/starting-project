@@ -1,5 +1,5 @@
-import "server-only";
-import { get, query, run } from "@/lib/db";
+import 'server-only';
+import { get, query, run } from '@/lib/db';
 
 export type Note = {
   id: string;
@@ -36,39 +36,34 @@ function toNote(row: NoteRow): Note {
   };
 }
 
-export function createNote(
-  userId: string,
-  data: { title: string; contentJson: string },
-): Note {
+export function createNote(userId: string, data: { title: string; contentJson: string }): Note {
   const id = crypto.randomUUID();
 
-  run(
-    `INSERT INTO notes (id, user_id, title, content_json) VALUES (?, ?, ?, ?)`,
-    [id, userId, data.title, data.contentJson],
-  );
+  run(`INSERT INTO notes (id, user_id, title, content_json) VALUES (?, ?, ?, ?)`, [
+    id,
+    userId,
+    data.title,
+    data.contentJson,
+  ]);
 
   const row = get<NoteRow>(`SELECT * FROM notes WHERE id = ?`, [id]);
   if (!row) {
-    throw new Error("Failed to create note");
+    throw new Error('Failed to create note');
   }
 
   return toNote(row);
 }
 
 export function getNotesByUser(userId: string): Note[] {
-  const rows = query<NoteRow>(
-    `SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC`,
-    [userId],
-  );
+  const rows = query<NoteRow>(`SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC`, [
+    userId,
+  ]);
 
   return rows.map(toNote);
 }
 
 export function getNoteById(userId: string, noteId: string): Note | null {
-  const row = get<NoteRow>(
-    `SELECT * FROM notes WHERE id = ? AND user_id = ?`,
-    [noteId, userId],
-  );
+  const row = get<NoteRow>(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [noteId, userId]);
 
   return row ? toNote(row) : null;
 }
@@ -96,10 +91,48 @@ export function updateNote(
 }
 
 export function deleteNote(userId: string, noteId: string): boolean {
-  const { changes } = run(
-    `DELETE FROM notes WHERE id = ? AND user_id = ?`,
-    [noteId, userId],
-  );
+  const { changes } = run(`DELETE FROM notes WHERE id = ? AND user_id = ?`, [noteId, userId]);
 
   return changes > 0;
+}
+
+function generateUniqueSlug(): string {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const slug = crypto.randomUUID().replace(/-/g, '');
+    const clash = get<{ id: string }>(`SELECT id FROM notes WHERE public_slug = ?`, [slug]);
+    if (!clash) return slug;
+  }
+  throw new Error('Failed to generate a unique public slug');
+}
+
+export function setNotePublic(userId: string, noteId: string, isPublic: boolean): Note | null {
+  if (isPublic) {
+    const existing = get<NoteRow>(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [
+      noteId,
+      userId,
+    ]);
+    if (!existing) return null;
+
+    const slug = existing.public_slug ?? generateUniqueSlug();
+    const { changes } = run(
+      `UPDATE notes SET is_public = 1, public_slug = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+      [slug, noteId, userId],
+    );
+    if (changes === 0) return null;
+  } else {
+    const { changes } = run(
+      `UPDATE notes SET is_public = 0, public_slug = NULL, updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+      [noteId, userId],
+    );
+    if (changes === 0) return null;
+  }
+
+  const row = get<NoteRow>(`SELECT * FROM notes WHERE id = ?`, [noteId]);
+  return row ? toNote(row) : null;
+}
+
+export function getNoteByPublicSlug(slug: string): Note | null {
+  const row = get<NoteRow>(`SELECT * FROM notes WHERE public_slug = ? AND is_public = 1`, [slug]);
+
+  return row ? toNote(row) : null;
 }

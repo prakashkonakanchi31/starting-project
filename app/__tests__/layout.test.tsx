@@ -82,15 +82,9 @@ describe('RootLayout', () => {
   });
 
   it('layout passes children to body element', () => {
-    const children = <div data-testid="test">Test Content</div>;
+    const children = <div data-testid='test'>Test Content</div>;
     const result = RootLayout({ children });
     const bodyProps = result.props.children.props;
     expect(bodyProps.children).toContain(children);
   });
 });
-
-
-
-
-
-
